@@ -1,0 +1,17 @@
+{
+  "name": "Mes Habitudes",
+  "short_name": "Habitudes",
+  "description": "Coche tes habitudes chaque jour, garde tes séries, débloque des trophées.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f5f1",
+  "theme_color": "#2f9e5b",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
