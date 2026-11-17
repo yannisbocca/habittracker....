@@ -25,31 +25,31 @@
 <style>
   /* Layout : 3 vues plein écran (stats | accueil | agenda), barre d'onglets fixe en bas, panneau d'édition qui monte du bas */
   :root {
-    --bg:#f3f5f1; --card:#ffffff; --fg:#1b221d; --mut:#6b766e; --line:#dde3dc; --ok:#2f9e5b; --flame:#d9822b; --bad:#c2412d; --shade:rgba(10,20,14,.4);
+    --bg:#f3f5f1; --card:#ffffff; --fg:#1b221d; --mut:#6b766e; --line:#dde3dc; --ok:#2f9e5b; --flame:#d9822b; --bad:#c2412d; --shade:rgba(10,20,14,.4); --onok:#ffffff;
     --display:'Bricolage Grotesque', system-ui, sans-serif; --body:'Figtree', system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-    --bg:#121614; --card:#1b201d; --fg:#e8ede9; --mut:#8c978f; --line:#2a312c; --ok:#45c477; --flame:#f0a050; --bad:#ef7a64; --shade:rgba(0,0,0,.6); color-scheme:dark } }
+    --bg:#121614; --card:#1b201d; --fg:#e8ede9; --mut:#8c978f; --line:#2a312c; --ok:#45c477; --flame:#f0a050; --bad:#ef7a64; --shade:rgba(0,0,0,.6); --onok:#0f1a13; color-scheme:dark } }
   :root[data-theme="dark"] {
-    --bg:#121614; --card:#1b201d; --fg:#e8ede9; --mut:#8c978f; --line:#2a312c; --ok:#45c477; --flame:#f0a050; --bad:#ef7a64; --shade:rgba(0,0,0,.6); color-scheme:dark }
+    --bg:#121614; --card:#1b201d; --fg:#e8ede9; --mut:#8c978f; --line:#2a312c; --ok:#45c477; --flame:#f0a050; --bad:#ef7a64; --shade:rgba(0,0,0,.6); --onok:#0f1a13; color-scheme:dark }
 
   body { background:var(--bg); color:var(--fg); font:16px/1.4 var(--body); }
   main { max-width:520px; margin:0 auto; padding-block:16px calc(88px + env(safe-area-inset-bottom, 0px));
     padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
   .view { display:grid; gap:20px; }
   h1, h2 { font-family:var(--display); margin:0; text-wrap:balance; }
-  h1 { font-size:1.25rem; text-align:center; flex:1; text-transform:capitalize; }
+  h1 { font-size:1.25rem; text-align:center; flex:1; }
+  h1::first-letter { text-transform:uppercase; }
   h2 { font-size:1.05rem; display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
   button { font:600 15px var(--body); background:var(--card); color:var(--fg); border:1px solid var(--line); border-radius:10px; padding:10px 14px; cursor:pointer; }
-  button.primary { background:var(--ok); border-color:var(--ok); color:#fff; }
+  button.primary { background:var(--ok); border-color:var(--ok); color:var(--onok); }
   button.danger { color:var(--bad); }
   button.danger.armed { background:var(--bad); border-color:var(--bad); color:#fff; }
   button:disabled { opacity:.35; cursor:default; }
-  button:focus-visible, input:focus-visible, label:focus-within { outline:2px solid var(--ok); outline-offset:2px; }
+  button:focus-visible, input:focus-visible, .chip:has(input:focus-visible), label.h:has(input:focus-visible), .switch:has(input:focus-visible) { outline:2px solid var(--ok); outline-offset:2px; }
   header { display:flex; align-items:center; gap:8px; }
   .list { display:grid; gap:8px; }
   label.h { display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; cursor:pointer; user-select:none; min-height:56px; }
-  label.h:focus-within { outline:none; }
   label.h:has(input:checked) { border-color:var(--ok); }
   label.h input { width:26px; height:26px; accent-color:var(--ok); flex:none; margin:0; }
   label.h .name { flex:1; min-width:0; }
@@ -71,7 +71,7 @@
   .cal .dow { font-size:.75rem; color:var(--mut); text-transform:uppercase; letter-spacing:.05em; }
   .cal button { aspect-ratio:1; max-width:100%; padding:0; border-radius:10px; font-variant-numeric:tabular-nums;
     background:color-mix(in srgb, var(--ok) calc(var(--p) * 100%), var(--card)); }
-  .cal button.hi { color:#fff; border-color:transparent; }
+  .cal button.hi { color:var(--onok); border-color:transparent; }
   .cal button.today { outline:2px solid var(--fg); outline-offset:1px; }
   .legend { display:flex; align-items:center; gap:6px; justify-content:flex-end; font-size:.8rem; color:var(--mut); }
   .legend i { width:16px; height:16px; border-radius:4px; border:1px solid var(--line); background:color-mix(in srgb, var(--ok) calc(var(--p) * 100%), var(--card)); }
@@ -84,6 +84,8 @@
   .chart { display:grid; grid-template-columns:repeat(12, 1fr); gap:4px; align-items:end; height:140px; border-bottom:1px solid var(--line); }
   .chart div { background:var(--ok); border-radius:4px 4px 0 0; min-height:2px; }
   .chart div.now { background:var(--flame); }
+  .chart div.none { background:none; border-bottom:2px dashed var(--line); border-radius:0; min-height:0; }
+  .months span.none { opacity:.4; }
   .months { display:grid; grid-template-columns:repeat(12, 1fr); gap:4px; font-size:.7rem; color:var(--mut); text-align:center; }
 
   nav { position:fixed; left:0; right:0; bottom:0; display:flex; justify-content:center; background:var(--card); border-top:1px solid var(--line);
@@ -92,8 +94,9 @@
     text-decoration:none; font:600 .72rem var(--body); background:none; border:0; border-radius:0; }
   nav svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   nav a[aria-current="page"] { color:var(--ok); }
+  @media (max-width:360px) { nav a, nav button { font-size:.62rem; } nav .fab { width:50px; height:50px; } }
   /* Bouton central surélevé */
-  nav .fab { width:56px; height:56px; margin-top:-26px; border-radius:50%; display:grid; place-items:center; background:var(--ok); color:#fff;
+  nav .fab { width:56px; height:56px; margin-top:-26px; border-radius:50%; display:grid; place-items:center; background:var(--ok); color:var(--onok);
     box-shadow:0 6px 18px color-mix(in srgb, var(--ok) 45%, transparent); border:4px solid var(--bg); transition:transform .2s; }
   nav .fab svg { width:26px; height:26px; stroke-width:2.6; }
   nav a.main:not([aria-current]) .fab { background:var(--card); color:var(--ok); box-shadow:none; border-color:var(--line); }
@@ -121,7 +124,7 @@
   .emojis { display:grid; grid-template-columns:repeat(8, 1fr); gap:6px; }
   .chip { display:grid; place-items:center; border:1px solid var(--line); background:var(--card); border-radius:10px; cursor:pointer; user-select:none; }
   .chip input { position:absolute; opacity:0; pointer-events:none; }
-  .chip:has(input:checked) { background:var(--ok); border-color:var(--ok); color:#fff; }
+  .chip:has(input:checked) { background:var(--ok); border-color:var(--ok); color:var(--onok); }
   .emojis .chip { aspect-ratio:1; font-size:1.3rem; }
   .days { display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; }
   .days .chip { aspect-ratio:1; font-weight:600; }
@@ -153,13 +156,13 @@
   .week button { display:grid; justify-items:center; gap:2px; padding:8px 0; border-radius:12px; font-variant-numeric:tabular-nums;
     background:color-mix(in srgb, var(--ok) calc(var(--p) * 100%), var(--card)); }
   .week button small { font-size:.7rem; color:inherit; opacity:.75; text-transform:uppercase; }
-  .week button.hi { color:#fff; border-color:transparent; }
+  .week button.hi { color:var(--onok); border-color:transparent; }
   .week button[aria-current] { outline:2px solid var(--fg); outline-offset:1px; }
 
   /* Gamification */
   .lvl { display:grid; gap:8px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px; }
   .lvl .top { display:flex; align-items:center; gap:14px; }
-  .badge { width:56px; height:56px; border-radius:50%; display:grid; place-items:center; flex:none; color:#fff;
+  .badge { width:56px; height:56px; border-radius:50%; display:grid; place-items:center; flex:none; color:var(--onok);
     font:700 1.4rem var(--display); background:conic-gradient(var(--ok) calc(var(--x) * 1%), var(--line) 0); position:relative; }
   .badge::before { content:""; position:absolute; inset:5px; border-radius:50%; background:var(--ok); }
   .badge span { position:relative; }
@@ -176,13 +179,13 @@
   .themes button i { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, var(--a) 50%, var(--b) 50%); }
   .themes button[aria-pressed="true"] { outline:2px solid var(--fg); outline-offset:1px; }
   .themes button:disabled { opacity:.5; }
-  .toast { position:fixed; z-index:30; left:50%; top:calc(12px + env(safe-area-inset-top, 0px)); transform:translateX(-50%); width:min(420px, calc(100% - 32px));
+  .toast { position:fixed; z-index:30; left:50%; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); width:min(420px, calc(100% - 32px));
     display:flex; align-items:center; gap:12px; background:var(--fg); color:var(--bg); border-radius:16px; padding:12px 16px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
   .toast .ic { font-size:1.8rem; }
   .toast small { color:inherit; opacity:.75; display:block; }
   .xp { position:fixed; z-index:25; pointer-events:none; font:700 .95rem var(--display); color:var(--ok); animation:xp .9s ease-out forwards; }
   @keyframes xp { to { opacity:0; transform:translateY(-40px); } }
-  @keyframes drop { from { opacity:0; transform:translate(-50%, -30px) scale(.9); } }
+  @keyframes drop { from { opacity:0; transform:translate(-50%, 30px) scale(.9); } }
   .toast { animation:drop .4s cubic-bezier(.2,.8,.2,1); }
 
   /* Animations */
@@ -222,7 +225,7 @@
   /* Sorties : keyframes à part, une même animation en "reverse" ne se relance pas */
   @keyframes fadeOut { to { opacity:0; } }
   @keyframes down { to { transform:translateY(100%); } }
-  @keyframes dropOut { to { opacity:0; transform:translate(-50%, -30px) scale(.9); } }
+  @keyframes dropOut { to { opacity:0; transform:translate(-50%, 30px) scale(.9); } }
   .sheet.closing { animation:fadeOut .25s ease-in forwards; }
   .sheet.closing .panel { animation:down .25s ease-in forwards; }
   .toast.out { animation:dropOut .25s ease-in forwards; }
@@ -257,7 +260,7 @@
   @keyframes rocket { 0%,20% { transform:none; } 60% { transform:translate(4px,-4px) rotate(2deg); } 100% { transform:translate(60px,-160px); opacity:0; } }
   .dcard { display:flex; align-items:center; gap:12px; background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:12px 16px; width:76%; text-align:left;
     animation:dpop 3s infinite; position:relative; }
-  .dbox { width:24px; height:24px; border-radius:6px; border:2px solid var(--ok); display:grid; place-items:center; color:#fff; font-weight:700; font-style:normal;
+  .dbox { width:24px; height:24px; border-radius:6px; border:2px solid var(--ok); display:grid; place-items:center; color:var(--onok); font-weight:700; font-style:normal;
     animation:dtick 3s infinite; }
   .dbox::after { content:"✓"; animation:dfade 3s infinite; }
   .dxp { position:absolute; right:12px; color:var(--ok); font-weight:700; animation:dxp 3s infinite; }
@@ -268,7 +271,7 @@
   .dchips { display:grid; grid-template-columns:repeat(7, 32px); gap:6px; }
   .dchips i { height:32px; border-radius:8px; border:1px solid var(--line); display:grid; place-items:center; font:600 .8rem var(--body); font-style:normal;
     animation:chip 3.5s infinite; animation-delay:calc(var(--i) * .2s); }
-  @keyframes chip { 0%,8% { background:var(--bg); color:var(--fg); } 15%,75% { background:var(--ok); color:#fff; transform:scale(1.08); } 80%,100% { background:var(--bg); color:var(--fg); transform:none; } }
+  @keyframes chip { 0%,8% { background:var(--bg); color:var(--fg); } 15%,75% { background:var(--ok); color:var(--onok); transform:scale(1.08); } 80%,100% { background:var(--bg); color:var(--fg); transform:none; } }
   .dweek { display:grid; grid-template-columns:repeat(7, 30px); gap:5px; }
   .dweek i { height:38px; border-radius:8px; background:color-mix(in srgb, var(--ok) calc(var(--p) * 100%), var(--bg)); border:1px solid var(--line); }
   .hand { position:absolute; bottom:14px; font-size:2rem; animation:swipe 2.2s ease-in-out infinite; }
@@ -285,7 +288,7 @@
   .lcard { width:100%; max-width:380px; display:grid; gap:16px; justify-items:center; text-align:center; animation:up .5s cubic-bezier(.2,.8,.2,1); }
   .lcard h1 { font-size:1.8rem; flex:none; }
   .lcard p { margin:0; }
-  .lring { width:88px; height:88px; border-radius:50%; background:var(--ok); color:#fff; display:grid; place-items:center; animation:tick .6s .2s ease-out backwards;
+  .lring { width:88px; height:88px; border-radius:50%; background:var(--ok); color:var(--onok); display:grid; place-items:center; animation:tick .6s .2s ease-out backwards;
     box-shadow:0 10px 30px color-mix(in srgb, var(--ok) 40%, transparent); }
   .lring svg { width:44px; height:44px; fill:none; stroke:currentColor; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
   .gbtn { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:14px; font-size:16px; border-radius:14px; }
@@ -476,12 +479,17 @@
 const key = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const noon = d => { d.setHours(12, 0, 0, 0); return d; };
 const wd = d => (d.getDay() + 6) % 7;
-const due = (h, d) => { const k = key(d); return h.days.includes(wd(d)) && k >= (h.from || '') && (!h.to || k < h.to); };
+// Jours prévus à une date donnée : h.hist garde les anciens réglages, [{ until: 'YYYY-MM-DD', days }] du plus ancien au plus récent
+const daysAt = (h, k) => { for (const e of h.hist || []) if (k < e.until) return e.days; return h.days; };
+const dueK = (h, d, k) => k >= (h.from || '') && (!h.to || k < h.to) && daysAt(h, k).includes(wd(d));
+const due = (h, d) => dueK(h, d, key(d));
 const done = (log, h, d) => (log[key(d)] || []).includes(h.id);
 // Taux du jour sur les habitudes prévues ce jour-là ; null si aucune n'est prévue
 function dayRate(log, habits, d) {
-  const list = habits.filter(h => due(h, d));
-  return list.length ? list.filter(h => done(log, h, d)).length / list.length : null;
+  const k = key(d), l = log[k] || [];
+  let n = 0, ok = 0;
+  for (const h of habits) if (dueK(h, d, k)) { n++; if (l.includes(h.id)) ok++; }
+  return n ? ok / n : null;
 }
 // Série : les jours non prévus ne cassent pas la série, aujourd'hui pas encore coché non plus
 function streak(log, h, today) {
@@ -522,15 +530,16 @@ const level = xp => { let L = 1; while (lvlStart(L + 1) <= xp) L++; return L; };
 function game(log, habits, today) {
   const keys = Object.keys(log).filter(k => log[k].length).sort();
   const first = keys.length ? noon(new Date(keys[0] + 'T12:00')) : new Date(today);
-  let checks = 0, perfect = 0, run = 0, bestRun = 0;
+  let checks = 0, perfect = 0, run = 0, bestRun = 0, active = 0;
   for (const d = new Date(first); d <= today; d.setDate(d.getDate() + 1)) {
-    checks += (log[key(d)] || []).length;
+    const n = (log[key(d)] || []).length;
+    checks += n; if (n) active++;
     const r = dayRate(log, habits, d);
     if (r === 1) { perfect++; run++; bestRun = Math.max(bestRun, run); } else if (r !== null) run = 0;
   }
   const streakMax = Math.max(0, ...habits.map(h => bestStreak(log, h, first, today)));
   const xp = checks * 10 + perfect * 50;
-  return { checks, perfect, bestRun, streakMax, xp, lvl: level(xp), habits: habits.filter(h => !h.to).length };
+  return { checks, perfect, bestRun, streakMax, xp, lvl: level(xp), active };
 }
 const TROPHIES = [
   ['🌱', 'Premier pas', 'Cocher une première case', s => s.checks, 1],
@@ -544,7 +553,7 @@ const TROPHIES = [
   ['🔥', 'Lancé', 'Série de 7 sur une habitude', s => s.streakMax, 7],
   ['☄️', 'Un mois de feu', 'Série de 30 sur une habitude', s => s.streakMax, 30],
   ['💯', 'Centurion', 'Série de 100 sur une habitude', s => s.streakMax, 100],
-  ['🎒', 'Bien équipé', '5 habitudes actives', s => s.habits, 5],
+  ['📆', 'Fidèle', '30 jours avec au moins une case', s => s.active, 30],
   ['🏅', 'Niveau 5', 'Atteindre le niveau 5', s => s.lvl, 5],
   ['👑', 'Niveau 15', 'Atteindre le niveau 15', s => s.lvl, 15],
 ].map(([icon, name, desc, val, goal]) => ({ id: name, icon, name, desc, val, goal }));
@@ -579,6 +588,10 @@ const lvlName = L => LVL_NAMES[Math.min(LVL_NAMES.length - 1, Math.floor((L - 1)
   console.assert(level(0) === 1 && level(99) === 1 && level(100) === 2 && level(299) === 2 && level(300) === 3, 'niveaux');
   const g = game(log, [A], t);
   console.assert(g.checks === 9 && g.perfect === 3 && g.bestRun === 3 && g.xp === 240, 'game');
+  // Jours modifiés le 3 nov : avant, tous les jours ; après, lundi seulement
+  const H = { id: 'H', days: [0], from: '2026-10-01', hist: [{ until: '2026-11-03', days: [0,1,2,3,4,5,6] }] };
+  console.assert(due(H, noon(new Date(2026, 10, 2))) && due(H, noon(new Date(2026, 10, 1))), 'ancien réglage avant le changement');
+  console.assert(!due(H, t) && due(H, noon(new Date(2026, 10, 9))), 'nouveau réglage à partir du changement');
 })();
 
 // --- stockage : Firebase sur le site (window.ONLINE, mis par build.sh), navigateur dans l'artefact de test ---
@@ -593,7 +606,8 @@ let data = fresh();
 // Ancien format : habitudes = simples noms ; le nom devient l'id pour garder l'historique
 const upgrade = s => ({ ...s, log: s.log || {}, habits: (s.habits || DEFAULT).map(h => typeof h === 'string' ? { id: h, name: h, emoji: '', days: ALL } : h) });
 let persist = () => { try { localStorage.setItem('habits-v1', JSON.stringify(data)); } catch {} };
-const save = () => { persist(); render(); };
+let ver = 0; // augmente à chaque changement de données : une page déjà à jour n'est pas redessinée
+const save = () => { ver++; persist(); render(); };
 let account = null; // { name, email, logout } quand connecté via Firebase
 
 const $ = id => document.getElementById(id);
@@ -635,13 +649,13 @@ function slidePages(out, inn, dir) {
   sliding = [a, b];
 }
 function show() {
-  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home';
-  if (cur && cur !== v) slidePages($('v-' + cur), $('v-' + v), VIEWS.indexOf(v) > VIEWS.indexOf(cur) ? 1 : -1);
-  else for (const s of VIEWS) $('v-' + s).hidden = s !== v;
-  if (cur !== v) { const n = $('v-' + v); n.classList.add('enter'); clearTimeout(n.t); n.t = setTimeout(() => n.classList.remove('enter'), 1200); }
+  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home', prev = cur;
   cur = v;
+  render(); // la page d'arrivée est prête avant de glisser : aucune image perdue au départ
+  if (prev && prev !== v) slidePages($('v-' + prev), $('v-' + v), VIEWS.indexOf(v) > VIEWS.indexOf(prev) ? 1 : -1);
+  else for (const s of VIEWS) $('v-' + s).hidden = s !== v;
+  if (prev !== v) { const n = $('v-' + v); n.classList.add('enter'); clearTimeout(n.t); n.t = setTimeout(() => n.classList.remove('enter'), 1200); }
   document.querySelectorAll('nav a').forEach(a => a.dataset.v === v ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
-  render();
 }
 addEventListener('hashchange', show);
 
@@ -652,12 +666,13 @@ $('next').onclick = () => { if (key(day) < key(new Date())) moveDay(1); };
 $('mPrev').onclick = () => moveMonth(-1);
 $('mNext').onclick = () => moveMonth(1);
 // Balayage gauche/droite : change de jour (accueil) ou de mois (agenda)
-let x0 = null;
-addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+let x0 = null, y0 = 0;
+addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
 addEventListener('touchend', e => {
   if (x0 === null || !$('sheet').hidden || !$('tuto').hidden) return;
-  const dx = e.changedTouches[0].clientX - x0; x0 = null;
-  if (Math.abs(dx) < 60) return;
+  const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+  // Un vrai balayage est surtout horizontal : un défilement en diagonale ne change pas de jour
+  if (Math.abs(dx) < 60 || Math.abs(dx) < 2 * Math.abs(dy)) return;
   if (cur === 'home') (dx < 0 ? $('next') : $('prev')).disabled || moveDay(dx < 0 ? 1 : -1);
   if (cur === 'agenda') (dx < 0 ? $('mNext') : $('mPrev')).disabled || moveMonth(dx < 0 ? 1 : -1);
 });
@@ -678,8 +693,15 @@ function toggle(h, on, box) {
     document.body.append(f); f.onanimationend = () => f.remove();
     setTimeout(() => f.remove(), 1200); // si animations coupées
   }
-  save();
+  // La case est déjà cochée à l'écran : on ne reconstruit pas la liste, on met juste à jour sa carte
+  const label = box.closest('label');
+  label.classList.remove('pop'); if (on) { void label.offsetWidth; label.classList.add('pop'); }
+  const s = streak(data.log, h, noon(new Date())), fl = label.querySelector('.streak');
+  fl.textContent = s ? `🔥 ${s}` : '';
+  s ? fl.setAttribute('aria-label', `série de ${s}`) : fl.removeAttribute('aria-label');
+  light = true; save(); light = false;
 }
+let light = false; // vrai pendant une coche : renderHome saute la reconstruction de la liste
 
 // --- toasts de trophée / niveau ---
 const queue = [];
@@ -722,16 +744,31 @@ $('fDays').append(...['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((t, i) => {
   l.append(el('input', { type: 'checkbox', value: i, id: 'dy' + i, ariaLabel: ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'][i] }), t);
   return l;
 }));
-document.querySelectorAll('.presets button').forEach(b => b.onclick = () =>
-  document.querySelectorAll('#fDays input').forEach(c => c.checked = b.dataset.days.includes(c.value)));
+document.querySelectorAll('.presets button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#fDays input').forEach(c => c.checked = b.dataset.days.includes(c.value));
+  $('fErr').hidden = true;
+});
 
-const openSheet = () => { clearTimeout(closeSheet.t); $('sheet').classList.remove('closing'); $('sheet').hidden = false; listMode(false); $('close').focus(); }; // le panneau monte, la liste ne glisse pas en plus
-const closeSheet = () => {
+// Le menu ajoute une entrée d'historique : le bouton retour du téléphone le ferme au lieu de changer de page
+const openSheet = () => {
+  clearTimeout(closeSheet.t); $('sheet').classList.remove('closing'); $('sheet').hidden = false; listMode(false); $('close').focus(); // le panneau monte, la liste ne glisse pas en plus
+  try { if (!history.state?.sheet) history.pushState({ sheet: true }, ''); } catch {}
+};
+const hideSheet = () => {
   if ($('sheet').hidden) return;
   $('sheet').classList.add('closing');
   closeSheet.t = setTimeout(() => { $('sheet').hidden = true; $('sheet').classList.remove('closing'); }, still.matches ? 0 : 220);
   $('edit').focus();
 };
+// Fermer depuis l'app retire aussi l'entrée d'historique ; then() sert à enchaîner une navigation après
+const closeSheet = () => new Promise(done => {
+  if (history.state?.sheet) { closeSheet.done = done; history.back(); } // popstate fera hideSheet puis done
+  else { hideSheet(); done(); }
+});
+addEventListener('popstate', () => {
+  if (!$('sheet').hidden) hideSheet();
+  closeSheet.done?.(); closeSheet.done = null;
+});
 $('edit').onclick = openSheet;
 
 // --- paramètres ---
@@ -785,9 +822,8 @@ $('aThemes').onclick = () => { data.allThemes = true; save(); toast('🎨', 'Th�
 $('aToast').onclick = () => toast('🏆', 'Trophée : Test', 'La bannière fonctionne');
 arm($('aClear'), 'Toucher encore pour vider', () => { data.log = {}; delete data.bonusXp; delete data.seen; save(); adminInfo(); });
 arm($('sReset'), 'Toucher encore pour tout effacer', () => {
-  data = fresh(); persist(); applyTheme(); day = noon(new Date()); month = new Date(day.getFullYear(), day.getMonth(), 1);
-  closeSheet(); location.hash = 'home'; render();
-  setTimeout(startTuto, 300);
+  data = fresh(); ver++; persist(); applyTheme(); day = noon(new Date()); month = new Date(day.getFullYear(), day.getMonth(), 1);
+  closeSheet().then(() => { location.hash = 'home'; render(); setTimeout(startTuto, 300); });
 });
 
 // --- tutoriel ---
@@ -904,6 +940,8 @@ function formMode(h) {
   anim($('form'), 'from-r');
   $('fName').focus();
 }
+// L'erreur disparaît dès qu'on corrige le formulaire
+$('form').addEventListener('input', () => { $('fErr').hidden = true; });
 $('add').onclick = () => formMode(null);
 $('back').onclick = listMode;
 
@@ -916,7 +954,13 @@ $('form').onsubmit = e => {
   if (err) { $('fErr').textContent = err; $('fErr').hidden = false; anim($('fErr'), 'pop'); return; }
   const emoji = document.querySelector('#fEmoji input:checked')?.value || '';
   // L'id ne change jamais : renommer garde l'historique
-  if (editing) Object.assign(editing, { name, emoji, days });
+  if (editing) {
+    // Nouveaux jours à partir d'aujourd'hui seulement : on garde les anciens pour le passé
+    const t = key(new Date()), old = editing.days;
+    if (String([...old].sort()) !== String([...days].sort()) && (editing.from || '') < t && !(editing.hist || []).some(e => e.until === t))
+      editing.hist = [...(editing.hist || []), { until: t, days: old }];
+    Object.assign(editing, { name, emoji, days });
+  }
   else data.habits.push({ id: Date.now().toString(36), name, emoji, days, from: key(new Date()) }); // compte à partir d'aujourd'hui
   save(); listMode();
 };
@@ -929,52 +973,68 @@ $('del').onclick = () => {
   save(); listMode();
 };
 
+// Ne dessine que la page affichée ; XP, trophées et niveau juste après, pour ne pas retarder les animations
 function render() {
-  const today = noon(new Date()), { log, habits } = data;
-  const fmt = (d, o) => d.toLocaleDateString('fr-FR', o);
+  const today = noon(new Date()), sig = ver + '|' + key(today);
+  if (cur === 'home' || !cur) renderHome(today);
+  if (cur === 'agenda') renderAgenda(today);
+  if (cur === 'stats' && renderStats.sig !== sig) { renderStats(today); renderStats.sig = sig; }
+  cancelAnimationFrame(render.raf); clearTimeout(render.t);
+  if (cur === 'trophies') { if (renderGame.sig !== sig) { renderGame(today, true); renderGame.sig = sig; } }
+  // XP et trophées : calculés une fois les animations de la coche jouées
+  else if (render.done !== sig) render.t = setTimeout(() => { renderGame(noon(new Date()), false); render.done = sig; }, still.matches ? 0 : 450);
+}
+const fmt = (d, o) => d.toLocaleDateString('fr-FR', o);
+const pct = x => Math.round(x * 100) + ' %';
+// Premier jour suivi : création de la plus ancienne habitude, ou première case cochée
+function firstDay() {
+  const ks = [...data.habits.map(h => h.from).filter(Boolean), ...Object.keys(data.log).filter(k => data.log[k].length)].sort();
+  return ks[0] || key(new Date());
+}
 
-  // Accueil : seulement les habitudes prévues ce jour-là
-  const isToday = key(day) === key(today);
+function renderHome(today) {
+  const { log, habits } = data;
+  const isToday = key(day) === key(today), start = firstDay();
   $('date').textContent = isToday ? "Aujourd'hui" : fmt(day, { weekday: 'long', day: 'numeric', month: 'long' });
   $('next').disabled = key(day) >= key(today);
+  $('prev').disabled = key(day) <= start; // pas de jours avant le début du suivi
   const todays = habits.filter(h => due(h, day));
   const n = todays.filter(h => done(log, h, day)).length, left = todays.length - n;
   const rate = dayRate(log, habits, day) ?? 0;
   $('dayCount').textContent = `${n} / ${todays.length}`;
   $('ringPct').textContent = Math.round(rate * 100) + '%';
   $('ringVal').setAttribute('stroke-dasharray', `${rate * 100} 100`);
+  $('ringVal').style.opacity = rate ? 1 : 0; // à 0 % le bout arrondi dessinait un point
   const hr = new Date().getHours();
-  $('greet').textContent = !isToday ? fmt(day, { day: 'numeric', month: 'long' }) : hr < 12 ? 'Bonjour' : hr < 18 ? 'Bon après-midi' : 'Bonsoir';
+  $('greet').textContent = !isToday ? 'Rattrapage' : hr < 12 ? 'Bonjour' : hr < 18 ? 'Bon après-midi' : 'Bonsoir';
   $('msg').textContent = !todays.length ? 'Journée libre.' : !left ? 'Journée parfaite 🎉' : !n ? (isToday ? 'Première case ?' : 'Rien de coché ce jour-là.')
     : `Plus que ${left} habitude${left > 1 ? 's' : ''}.`;
-  // Résumé : série de jours parfaits + meilleure série en cours
+  // Résumé : série de jours parfaits + meilleure série en cours (remonte au plus jusqu'au début du suivi)
   let perfect = 0;
-  // Borné à 1000 jours : avant, un historique vide (tout à null) faisait tourner la boucle sans fin
-  for (let i = 0, d = new Date(today); i < 1000; i++, d.setDate(d.getDate() - 1)) {
+  for (let d = new Date(today); key(d) >= start; d.setDate(d.getDate() - 1)) {
     const r = dayRate(log, habits, d);
     if (r === 1) perfect++; else if (r !== null && !(key(d) === key(today) && r < 1)) break;
   }
   const top = habits.filter(h => !h.to).map(h => [streak(log, h, today), h]).sort((a, b) => b[0] - a[0])[0];
-  const g = game(log, habits, today);
-  if (data.bonusXp) { g.xp += data.bonusXp; g.lvl = level(g.xp); } // bonus du mode admin
   $('chips').replaceChildren(
-    el('span', { textContent: `🏅 Niv. ${g.lvl}` }),
-    el('span', { textContent: `⭐ ${perfect} j. parfait${perfect > 1 ? 's' : ''} d'affilée` }),
+    el('span', { id: 'lvlChip', textContent: $('lvlChip')?.textContent || '🏅 Niv. 1' }),
+    ...(perfect ? [el('span', { textContent: `⭐ ${perfect} j. parfait${perfect > 1 ? 's' : ''} d'affilée` })] : []),
     ...(top && top[0] ? [el('span', { textContent: `🔥 ${top[0]} · ${top[1].emoji || top[1].name}` })] : []));
 
   // Semaine du jour affiché
   const mon = noon(new Date(day)); mon.setDate(mon.getDate() - wd(mon));
   $('week').replaceChildren(...Array.from({ length: 7 }, (_, i) => {
     const d = noon(new Date(mon)); d.setDate(d.getDate() + i);
-    const p = d > today ? 0 : dayRate(log, habits, d) ?? 0;
-    const b = el('button', { disabled: d > today, className: p >= .6 ? 'hi' : '', ariaLabel: `${fmt(d, { weekday: 'long', day: 'numeric' })} : ${Math.round(p * 100)} %` });
+    const off = d > today || key(d) < start;
+    const p = off ? 0 : dayRate(log, habits, d) ?? 0;
+    const b = el('button', { disabled: off, className: p >= .6 ? 'hi' : '', ariaLabel: `${fmt(d, { weekday: 'long', day: 'numeric' })} : ${Math.round(p * 100)} %` });
     b.append(el('small', { textContent: fmt(d, { weekday: 'short' }).slice(0, 3) }), el('span', { textContent: d.getDate() }));
     b.style.setProperty('--p', p);
     if (key(d) === key(day)) b.setAttribute('aria-current', 'date');
     b.onclick = () => { const diff = Math.round((d - day) / 864e5); if (diff) moveDay(diff); };
     return b;
   }));
-  flip($('list'), () => $('list').replaceChildren(...todays.map(h => {
+  if (!light) flip($('list'), () => $('list').replaceChildren(...todays.map(h => {
     const c = el('input', { type: 'checkbox', id: 'h-' + h.id, checked: done(log, h, day), onchange: () => toggle(h, c.checked, c) });
     const s = streak(log, h, today);
     const fl = el('span', { className: 'streak', textContent: s ? `🔥 ${s}` : '' });
@@ -985,26 +1045,42 @@ function render() {
     if (h.id === popped) l.classList.add('pop');
     return l;
   })));
-  if (!todays.length) $('list').append(el('p', { className: 'empty', textContent: 'Rien de prévu ce jour-là.' }));
-  if (popped && !left) anim($('hero'), 'perfect');
+  if (!light && !todays.length) $('list').append(el('p', { className: 'empty', textContent: 'Rien de prévu ce jour-là.' }));
+  if (popped && !left) { anim($('hero'), 'perfect'); render.party = true; } // les bannières attendent la fin de la fête
   popped = null;
+}
 
-  // Agenda
+function renderAgenda(today) {
+  const { log, habits } = data, start = firstDay();
   $('mTitle').textContent = fmt(month, { month: 'long', year: 'numeric' });
   $('mNext').disabled = month >= new Date(today.getFullYear(), today.getMonth(), 1);
+  $('mPrev').disabled = key(new Date(month.getFullYear(), month.getMonth(), 0)) < start;
   const cells = ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(t => el('div', { className: 'dow', textContent: t }));
   for (let i = 0; i < wd(month); i++) cells.push(el('div'));
   const last = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
   for (let i = 1; i <= last; i++) {
-    const d = noon(new Date(month.getFullYear(), month.getMonth(), i)), future = d > today;
-    const p = future ? 0 : dayRate(log, habits, d) ?? 0;
-    const b = el('button', { textContent: i, disabled: future, className: (p >= .6 ? 'hi ' : '') + (key(d) === key(today) ? 'today' : '') });
+    const d = noon(new Date(month.getFullYear(), month.getMonth(), i)), off = d > today || key(d) < start;
+    const p = off ? 0 : dayRate(log, habits, d) ?? 0;
+    const b = el('button', { textContent: i, disabled: off, className: (p >= .6 ? 'hi ' : '') + (key(d) === key(today) ? 'today' : '') });
     b.style.setProperty('--p', p);
     b.setAttribute('aria-label', `${fmt(d, { day: 'numeric', month: 'long' })} : ${Math.round(p * 100)} %`);
     b.onclick = () => { day = d; location.hash = 'home'; };
     cells.push(b);
   }
   $('cal').replaceChildren(...cells);
+}
+
+function renderGame(today, paint) {
+  const { log, habits } = data;
+  const g = game(log, habits, today);
+  if (data.bonusXp) { g.xp += data.bonusXp; g.lvl = level(g.xp); } // bonus du mode admin
+  if ($('lvlChip')) $('lvlChip').textContent = `🏅 Niv. ${g.lvl}`;
+  const unlocked = TROPHIES.filter(t => t.val(g) >= t.goal);
+  if (paint) paintTrophies(g, unlocked);
+  rewards(g, unlocked);
+}
+
+function paintTrophies(g, unlocked) {
 
   // Niveau
   const into = g.xp - lvlStart(g.lvl), span = lvlStart(g.lvl + 1) - lvlStart(g.lvl), x = Math.round(100 * into / span);
@@ -1015,12 +1091,11 @@ function render() {
   $('lvlBar').style.width = x + '%';
 
   // Trophées : débloqués d'abord, sinon progression vers l'objectif
-  const unlocked = TROPHIES.filter(t => t.val(g) >= t.goal);
   $('trCount').textContent = `${unlocked.length}/${TROPHIES.length}`;
   $('gChecks').textContent = g.checks;
   $('gStreak').textContent = '🔥 ' + g.streakMax;
-  // Prochain objectif : le trophée verrouillé le plus avancé
-  const nextT = TROPHIES.filter(t => !unlocked.includes(t)).sort((a, b) => b.val(g) / b.goal - a.val(g) / a.goal)[0];
+  // Prochain objectif : le trophée verrouillé le plus avancé, hors niveaux (déjà montrés par la carte de niveau)
+  const nextT = TROPHIES.filter(t => !unlocked.includes(t) && !t.id.startsWith('Niveau')).sort((a, b) => b.val(g) / b.goal - a.val(g) / a.goal)[0];
   $('goalBox').hidden = !nextT;
   if (nextT) {
     const v = Math.min(nextT.val(g), nextT.goal), bar = el('div', { className: 'bar' }), f = el('i');
@@ -1031,7 +1106,7 @@ function render() {
   $('trophies').replaceChildren(...[...unlocked, ...TROPHIES.filter(t => !unlocked.includes(t))].map((t, i) => {
     const ok = unlocked.includes(t), v = Math.min(t.val(g), t.goal);
     const c = el('div', { className: 'trophy' + (ok ? '' : ' locked') });
-    c.style.setProperty('--i', i);
+    c.style.setProperty('--i', Math.min(i, 6)); // cascade limitée aux premières cartes
     c.append(el('span', { className: 'ic', textContent: t.icon }), el('b', { textContent: t.name }), el('small', { className: 'mut', textContent: t.desc }));
     if (!ok) {
       const bar = el('div', { className: 'bar' }), f = el('i'); f.style.width = Math.round(100 * v / t.goal) + '%';
@@ -1049,34 +1124,46 @@ function render() {
     return b;
   }));
 
-  // Nouveaux trophées / niveaux → toast (au premier lancement on enregistre sans fêter)
-  const ids = unlocked.map(t => t.id);
+}
+
+function rewards(g, unlocked) {
+  // Nouveaux trophées / niveaux → bannière (au premier lancement on enregistre sans fêter)
+  const ids = unlocked.map(t => t.id), news = [];
   if (data.seen) {
-    for (const t of unlocked) if (!data.seen.includes(t.id)) toast(t.icon, `Trophée : ${t.name}`, t.desc);
+    for (const t of unlocked) if (!data.seen.includes(t.id)) news.push([t.icon, `Trophée : ${t.name}`, t.desc]);
     if (g.lvl > data.lvlSeen) {
       const th = THEMES.find(t => t.lvl === g.lvl);
-      toast('🏅', `Niveau ${g.lvl} !`, th ? `Nouveau thème : ${th.name}` : lvlName(g.lvl));
+      news.push(['🏅', `Niveau ${g.lvl} !`, th ? `Nouveau thème : ${th.name}` : lvlName(g.lvl)]);
     }
   }
+  // Après une journée parfaite, on laisse la fête se jouer avant les bannières
+  const wait = render.party && !still.matches ? 1600 : 0; render.party = false;
+  setTimeout(() => news.forEach(n => toast(...n)), wait);
   // Gardés au maximum atteint : décocher puis recocher ne refait pas la fête
   const seen = [...new Set([...(data.seen || []), ...ids])], top2 = Math.max(data.lvlSeen || 0, g.lvl);
   if (String(seen) !== String(data.seen) || top2 !== data.lvlSeen) {
     data.seen = seen; data.lvlSeen = top2;
     persist();
   }
+}
 
-  // Stats
+function renderStats(today) {
+  const { log, habits } = data, start = firstDay();
   const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  const pct = x => Math.round(x * 100) + ' %';
   const months = Array.from({ length: 12 }, (_, i) => new Date(today.getFullYear(), today.getMonth() - 11 + i, 1));
-  const rates = months.map(m => monthAvg(m, today, d => dayRate(log, habits, d)));
-  const tracked = rates.filter((r, i) => r > 0 || i === 11);
+  // Mois entièrement avant le début du suivi : sans donnée, ni comptés à 0 % ni dans la moyenne
+  const before = months.map(m => key(new Date(m.getFullYear(), m.getMonth() + 1, 0)) < start);
+  const rates = months.map(m => monthAvg(m, today, d => key(d) < start ? null : dayRate(log, habits, d)));
+  const tracked = rates.filter((r, i) => !before[i]);
   $('tMonth').textContent = pct(rates[11]);
   $('tYear').textContent = pct(tracked.reduce((a, b) => a + b, 0) / tracked.length);
   $('tBest').textContent = Object.keys(log).filter(k => dayRate(log, habits, noon(new Date(k + 'T12:00'))) === 1).length;
-  $('chart').replaceChildren(...rates.map((r, i) => { const b = el('div', { className: i === 11 ? 'now' : '', title: pct(r) }); b.style.height = Math.round(r * 100) + '%'; return b; }));
-  $('chart').setAttribute('aria-label', 'Assiduité sur 12 mois : ' + months.map((m, i) => fmt(m, { month: 'short' }) + ' ' + pct(rates[i])).join(', '));
-  $('months').replaceChildren(...months.map(m => el('span', { textContent: fmt(m, { month: 'narrow' }) })));
+  $('chart').replaceChildren(...rates.map((r, i) => {
+    const b = el('div', { className: before[i] ? 'none' : i === 11 ? 'now' : '', title: before[i] ? 'pas encore suivi' : pct(r) });
+    b.style.height = before[i] ? '' : Math.round(r * 100) + '%'; return b;
+  }));
+  $('chart').setAttribute('aria-label', 'Assiduité sur 12 mois : ' + months.map((m, i) => fmt(m, { month: 'short' }) + ' ' + (before[i] ? 'pas encore suivi' : pct(rates[i]))).join(', '));
+  $('months').replaceChildren(...months.map((m, i) => el('span', { className: before[i] ? 'none' : '', textContent: fmt(m, { month: 'narrow' }) })));
   // Habitudes arrêtées gardées tant qu'elles ont des jours dans les 12 derniers mois
   const hit = h => d => due(h, d) ? +done(log, h, d) : null;
   $('stats').replaceChildren(...habits.filter(h => avg(months[0], today, today, hit(h)) !== null).map(h => {
@@ -1098,13 +1185,40 @@ function start() {
 }
 
 // --- Firebase (site uniquement) ---
+// Texte stable d'une valeur (clés triées) : Firestore renvoie les objets avec les clés dans un autre ordre
+const canon = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a < b ? -1 : 1)) : x);
+// Découpe les données en champs à sauvegarder séparément : un par réglage, un par jour d'historique
+function fields(d) {
+  const out = {};
+  for (const [k, v] of Object.entries(d)) if (k !== 'log' && v !== undefined) out[k] = canon(v);
+  for (const [day, ids] of Object.entries(d.log || {})) out['log.' + day] = canon(ids);
+  return out;
+}
+// Ce qui a changé entre deux découpages : [champ, valeur] (valeur null = champ supprimé)
+function changes(before, now) {
+  const out = [];
+  for (const k in now) if (now[k] !== before[k]) out.push([k, JSON.parse(now[k])]);
+  for (const k in before) if (!(k in now)) out.push([k, null]);
+  return out;
+}
+// self-check : seul le jour coché part, l'ordre des clés ne compte pas, un champ retiré est supprimé
+(() => {
+  const a = { habits: [{ id: 'x', name: 'Lire' }], log: { '2026-11-16': ['x'] }, theme: 'Forêt' };
+  const b = { habits: [{ name: 'Lire', id: 'x' }], log: { '2026-11-16': ['x'], '2026-11-17': ['x'] } };
+  const c = changes(fields(a), fields(b));
+  console.assert(c.length === 2 && c.some(([k, v]) => k === 'log.2026-11-17' && v[0] === 'x') && c.some(([k, v]) => k === 'theme' && v === null), 'sync');
+})();
+
 async function online() {
+  const login = $('login'), btn = $('gBtn'), msg = $('loginMsg');
+  // Écran de chargement tout de suite : rien n'est cliquable avant que les données soient là
+  login.hidden = false; btn.hidden = true; $('loading').hidden = false;
+  if (isSecureContext && location.protocol !== 'file:') navigator.serviceWorker?.register('sw.js').catch(() => {}); // ouverture hors ligne
   const v = 'https://www.gstatic.com/firebasejs/10.12.2/';
   const [{ initializeApp }, A, F] = await Promise.all(['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js'].map(f => import(v + f)));
   const app = initializeApp(window.FIREBASE);
   const auth = A.getAuth(app);
   const db = F.initializeFirestore(app, { localCache: F.persistentLocalCache() }); // marche aussi hors ligne
-  const login = $('login'), btn = $('gBtn'), msg = $('loginMsg');
   btn.onclick = async () => {
     btn.disabled = true; msg.textContent = '';
     try { await A.signInWithPopup(auth, new A.GoogleAuthProvider()); }
@@ -1117,9 +1231,9 @@ async function online() {
   };
   let started = false;
   A.onAuthStateChanged(auth, async user => {
-    if (!user) { if (started) return location.reload(); login.hidden = false; $('loading').hidden = true; btn.disabled = false; return; }
+    if (!user) { if (started) return location.reload(); login.hidden = false; $('loading').hidden = true; btn.hidden = false; btn.disabled = false; return; }
     if (started) return;
-    $('loading').hidden = false; btn.disabled = true;
+    $('loading').hidden = false; btn.hidden = true;
     const ref = F.doc(db, 'users', user.uid);
     let isNew;
     try {
@@ -1127,9 +1241,25 @@ async function online() {
       isNew = !snap.exists();
       data = isNew ? fresh() : upgrade(snap.data());
     } catch { msg.textContent = 'Impossible de charger tes données. Vérifie ta connexion puis recharge la page.'; $('loading').hidden = true; return; }
-    // shortcut: on réécrit tout le document à chaque changement ; deux appareils ouverts en même temps : le dernier qui coche gagne
-    persist = () => F.setDoc(ref, JSON.parse(JSON.stringify(data))).catch(() => toast('⚠️', 'Sauvegarde impossible', 'Vérifie ta connexion, tes coches restent sur cet appareil'));
-    if (isNew) persist();
+    // On n'envoie que les champs modifiés (un jour coché = un champ) : deux appareils ne s'écrasent plus
+    let saved = fields(data);
+    const fail = () => toast('⚠️', 'Sauvegarde impossible', 'Vérifie ta connexion, tes coches restent sur cet appareil');
+    persist = () => {
+      const now = fields(data), diff = changes(saved, now);
+      saved = now;
+      if (!diff.length) return;
+      const args = diff.flatMap(([k, val]) => [new F.FieldPath(...k.split('.')), val === null ? F.deleteField() : val]);
+      F.updateDoc(ref, ...args).catch(e => e.code === 'not-found' ? F.setDoc(ref, JSON.parse(JSON.stringify(data))).catch(fail) : fail());
+    };
+    if (isNew) F.setDoc(ref, JSON.parse(JSON.stringify(data))).catch(fail);
+    // Changements faits sur un autre appareil : on les reçoit en direct
+    F.onSnapshot(ref, snap => {
+      if (snap.metadata.hasPendingWrites || !snap.exists()) return;
+      const remote = upgrade(snap.data()), f = fields(remote);
+      if (!changes(saved, f).length) return; // c'est notre propre sauvegarde qui revient
+      data = remote; saved = f; ver++;
+      applyTheme(); render();
+    }, () => {});
     account = { name: user.displayName, email: user.email, logout: () => A.signOut(auth) };
     started = true;
     login.classList.add('closing');
